@@ -6,6 +6,7 @@ const URL_LOGIN = `${URL_ACCOUNT}/login`;
 const URL_REGISTER = `${URL_ACCOUNT}/register`;
 
 const URL_USER = `${BASE_URL}/user`;
+const URL_USER_ADD = `${URL_USER}/add`;
 const URL_USER_BY_EMAIL = `${URL_USER}/byEmail/`;
 
 const headers = { 'Content-Type': 'application/json' };
@@ -59,17 +60,45 @@ export class AuthService extends User {
 
     getBearerHeader = () => this.bearerHeader;
 
+    async registerUser(email, password) {
+        const body = { "email": email.toLowerCase(), "password": password };
+        try {
+            await axios.post(URL_REGISTER, body);
+        } catch (err) {
+            console.error(err);
+            throw err;
+        }
+    }
+
+    async createUser(name, email, avatarName, avatarColor) {
+        const headers = this.getBearerHeader();
+        const body = {
+            "name": name,
+            "email": email,
+            "avatarName": avatarName,
+            "avatarColor": avatarColor
+        };
+        try {
+            const res = await axios.post(URL_USER_ADD, body, { headers });
+            this.setUserData(res.data);
+        } catch (err) {
+            console.error(err);
+            throw err;
+        }
+    }
+
     async loginUser(email, password) {
         const body = { "email": email.toLowerCase(), "password": password };
         try {
             const res = await axios.post(URL_LOGIN, body, { headers });
             this.setAuthToken(res.data.token);
             this.setBearerHeader(res.data.token);
-            this.setUserEmail(res.data.email);
+            this.setUserEmail(res.data.user);
             this.setIsLoggedIn(true);
             await this.findUserByEmail();
         } catch (err) {
             console.error(err);
+            throw err;
         }
     }
 

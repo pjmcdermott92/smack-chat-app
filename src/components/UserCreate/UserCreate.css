@@ -22,9 +22,43 @@
     cursor: pointer;
 }
 
+.avatar-theme-toggle {
+    display: flex;
+    align-items: center;
+    margin: 0 auto;
+}
+
+.avatar-theme-toggle input[type="radio"] { display: none; }
+.avatar-theme-toggle label {
+    display: block;
+    margin: 0 0 1rem;
+    padding: .15rem .75rem;
+    font-weight: bold;
+    border-top: 1px solid var(--cloudy);
+    border-bottom: 1px solid var(--cloudy);
+    cursor: pointer;
+    transition: ease-in-out 200ms;
+}
+
+.avatar-theme-toggle label:hover {
+    background-color: #DDD;
+}
+
+.avatar-theme-toggle label:last-child {
+    border-left: 1px solid var(--cloudy);
+}
+
+.avatar-theme-toggle input:checked + label {
+    background-color: #CCC;
+}
+
 .avatar-list {
     display: flex;
     flex-wrap: wrap;
+}
+
+.avatar-list.light {
+    background-color: #CCC;
 }
 
 .avatar-list .avatar-icon {

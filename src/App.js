@@ -1,20 +1,22 @@
 import React, { useState, createContext, useContext } from 'react';
 import {
   BrowserRouter as Router,
-  Routes,
+  Switch,
   Route,
-  Navigate
+  Redirect
 } from 'react-router-dom';
 import './App.css';
 import ChatApp from './components/ChatApp/ChatApp';
 import UserCreate from './components/UserCreate/UserCreate';
 import UserLogin from './components/UserLogin/UserLogin';
+import { AuthService } from './services';
 
+const authService = new AuthService();
 export const UserContext = createContext();
 
 const AuthProvider = ({ children }) => {
   const context = {
-    //authService
+    authService,
     //messageService
     appSelectedChannel: {},
     appSetChannel: (chnl) => {
@@ -32,24 +34,25 @@ const AuthProvider = ({ children }) => {
   )
 }
 
-const PrivateRoute = ({ children }) => {
-  const isLoggedIn = true;
-  return isLoggedIn ? children : <Navigate to="/login" />
+const PrivateRoute = ({ children, ...props }) => {
+  const context = useContext(UserContext);
+  return <Route {...props} render={({ location }) => context.authService.isLoggedIn
+    ? (children)
+    : <Redirect to={{ pathname: '/login', state: { from: location }}} />}
+  />
 }
 
 function App() {
   return (
     <AuthProvider>
       <Router>
-          <Routes>
-            <Route path="/login" element={<UserLogin />} />
-            <Route path="/register" element={<UserCreate />} />
-            <Route path="/" element={
-              <PrivateRoute>
-                <ChatApp />
-              </PrivateRoute>
-            } />
-          </Routes>
+        <Switch>
+            <Route exact path="/login" component={UserLogin} />
+            <Route exact path="/register" component={UserCreate} />
+            <PrivateRoute>
+              <ChatApp />
+            </PrivateRoute>
+          </Switch>
       </Router>
     </AuthProvider>
   );

@@ -1,4 +1,4 @@
-export const AVATARS = [
+export const DARK_AVATARS = [
     'dark0.png',
     'dark1.png',
     'dark2.png',
@@ -27,4 +27,35 @@ export const AVATARS = [
     'dark25.png',
     'dark26.png',
     'dark27.png',
+];
+
+export const LIGHT_AVATARS = [
+    'light0.png',
+    'light1.png',
+    'light2.png',
+    'light3.png',
+    'light4.png',
+    'light5.png',
+    'light6.png',
+    'light7.png',
+    'light8.png',
+    'light9.png',
+    'light10.png',
+    'light11.png',
+    'light12.png',
+    'light13.png',
+    'light14.png',
+    'light15.png',
+    'light16.png',
+    'light17.png',
+    'light18.png',
+    'light19.png',
+    'light20.png',
+    'light21.png',
+    'light22.png',
+    'light23.png',
+    'light24.png',
+    'light25.png',
+    'light26.png',
+    'light27.png',
 ];
