@@ -1,4 +1,5 @@
 import axios from "axios";
+import io from 'socket.io-client';
 
 const BASE_URL = 'http://localhost:3005/v1';
 const URL_ACCOUNT = `${BASE_URL}/account`;
@@ -9,6 +10,8 @@ const URL_USER = `${BASE_URL}/user`;
 const URL_USER_ADD = `${URL_USER}/add`;
 const URL_USER_BY_EMAIL = `${URL_USER}/byEmail/`;
 
+const URL_GET_CHANNELS = `${BASE_URL}/channel`;
+
 const headers = { 'Content-Type': 'application/json' };
 
 class User {
@@ -16,7 +19,7 @@ class User {
         this.id = '';
         this.name = '';
         this.email = '';
-        this.avatarName = '';
+        this.avatarName = 'avatarDefault.png';
         this.avatarColor = '';
         this.isLoggedIn = false;
     }
@@ -31,15 +34,6 @@ class User {
         this.email = email;
         this.avatarName = avatarName;
         this.avatarColor = avatarColor;
-    }
-
-    logoutUser() {
-        this.id = '';
-        this.name = '';
-        this.email = '';
-        this.avatarName = '';
-        this.avatarColor = '';
-        this.isLoggedIn = false;
     }
 }
 
@@ -59,6 +53,17 @@ export class AuthService extends User {
     }
 
     getBearerHeader = () => this.bearerHeader;
+
+    logoutUser() {
+        this.id = '';
+        this.name = '';
+        this.email = '';
+        this.avatarName = '';
+        this.avatarColor = '';
+        this.isLoggedIn = false;
+        this.authToken = '';
+        this.bearerHeader = {};
+    }
 
     async registerUser(email, password) {
         const body = { "email": email.toLowerCase(), "password": password };
@@ -110,5 +115,64 @@ export class AuthService extends User {
         } catch (err) {
             console.error(err);
         }
+    }
+}
+
+export class ChatService {
+    constructor(authHeader) {
+        this.getAuthHeader = authHeader;
+        this.channels = [];
+        this.selectedChannel = {};
+    }
+
+    addChannel = channel => this.channels.push(channel);
+    setSelectedChannel = channel => this.selectedChannel = channel;
+    getAllChannels = () => this.channels;
+
+    async findAllChannels() {
+        const headers = this.getAuthHeader();
+        try {
+            let res = await axios.get(URL_GET_CHANNELS, { headers });
+            res = res.data.map(channel => ({
+                name: channel.name,
+                description: channel.description,
+                id: channel._id
+            }));
+            this.channels = [ ...res ];
+            return res;
+        } catch (err) {
+            console.error(err);
+            throw err;
+        }
+    }
+}
+
+export class SocketService {
+    socket = io('http://localhost:3005/');
+    constructor(socketAddChannel, getAllChannels) {
+        this.socketAddChannel = socketAddChannel;
+    }
+
+    establishConnection() {
+        console.log('client connected');
+        this.socket.connect();
+    }
+
+    closeConnection() {
+        console.log('client disconnected');
+        this.socket.disconnect();
+    }
+
+    addChannel(name, description) {
+        this.socket.emit('newChannel', name, description);
+    }
+
+    getChannel(cb) {
+        this.socket.on('channelCreated', (name, description, id) => {
+            const channel = { name, description, id }
+            this.socketAddChannel(channel);
+            const channelList = this.getAllChannels();
+            cb(channelList);
+        });
     }
 }

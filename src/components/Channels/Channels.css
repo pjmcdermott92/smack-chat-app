@@ -1,0 +1,52 @@
+.channel {
+    background-color: var(--primary);
+    min-width: 200px;
+    height: 100%;
+    padding: 10px;
+}
+
+.form.channel-form {
+    margin: auto;
+    box-shadow: none;
+}
+
+.channel-header {
+    text-align: center;
+    color: var(--lunar);
+    border-bottom: 1px solid rgba(200,187,200, 0.3);
+}
+
+.channel-label span {
+    float: right;
+    cursor: pointer;
+    transition: ease-in-out 300ms;
+}
+
+.channel-label span:hover {
+    color: var(--cloudy);
+}
+
+.channel-label .inner.selected {
+    padding: 0 5px;
+    border-radius: 5px;
+}
+
+.channel-label .inner.selected,
+.channel-label .inner.selected:hover {
+    background-color: #0F79D7;
+}
+
+.channel-label .inner:hover {
+    background: var(--primary-nav);
+    cursor: pointer;
+}
+
+.channel-label {
+    display: inline;
+    color: var(--lunar);
+    line-height: 2;
+}
+
+.channel-list {
+    padding: 20px 0;
+}

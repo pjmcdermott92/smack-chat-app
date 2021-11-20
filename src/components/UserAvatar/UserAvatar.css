@@ -1,0 +1,9 @@
+.avatar-icon {
+    border-radius: 50%;
+    transition: ease-in-out 300ms;
+    width: 100%;
+}
+
+.avatar-icon.lg { max-width: 100px; }
+.avatar-icon.md { max-width: 50px; }
+.avatar-icon.sm { max-width: 45px; }

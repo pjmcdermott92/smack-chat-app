@@ -4,6 +4,7 @@ import { UserContext } from '../../App';
 import { DARK_AVATARS, LIGHT_AVATARS } from '../../constants';
 import Alert from '../Alert/Alert';
 import Modal from '../Modal/Modal';
+import UserAvatar from '../UserAvatar/UserAvatar';
 import './UserCreate.css';
 
 const UserCreate = ({ history }) => {
@@ -98,7 +99,7 @@ const UserCreate = ({ history }) => {
                     value={password}
                 />
                 <div className="avatar-container">
-                    <img className="avatar-icon avatar-border-radius" style={{ backgroundColor: avatarColor }} src={avatarName} alt="avatar" />
+                    <UserAvatar avatar={{ avatarName, avatarColor }} className="create-avatar" />
                     <div className="avatar-text" onClick={() => setModal(true)}>Choose Avatar</div>
                     <div className="avatar-text" onClick={generateBgColor}>Generate Background Color</div>
                 </div>
@@ -115,7 +116,7 @@ const UserCreate = ({ history }) => {
             </div>
             <div className={`avatar-list ${avatarTheme === 'light' && 'light' }`}>
                 {AVATARS.map(img => (
-                    <div key={img} className="avatar-icon" onClick={() => chooseAvatar(img)} role="presentation">
+                    <div key={img} className="create-avatar" onClick={() => chooseAvatar(img)} role="presentation">
                         <img src={img} alt="avatar" />
                     </div>
                 ))}
