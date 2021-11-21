@@ -1,31 +1,40 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { UserContext } from '../../App';
 import Modal from '../Modal/Modal';
+import { toCammelCase } from '../../helpers/cammelCase';
 import './Channels.css';
 
-const Channels = () => {
+const Channels = ({ unread }) => {
 
     const INIT = { name: '', description: '' };
 
     const [channels, setChannels] = useState('');
+    const [unreadChannels, setUnreadChannels] = useState([]);
     const [modal, setModal] = useState(false);
     const [newChannel, setNewChannel] = useState(INIT);
     const { authService, chatService, appSetChannel, socketService, appSelectedChannel } = useContext(UserContext);
 
     useEffect(() => {
+        setUnreadChannels(unread);
+    }, [unread]);
+
+    useEffect(() => {
         chatService.findAllChannels().then(res => {
             setChannels(res);
+            appSetChannel(res[0]);
         });
     }, []);
 
     useEffect(() => {
-        socketService.getChannel(channel => {
-            setChannels([ ...channels, channel ]);
+        socketService.getChannel(channelList => {
+            setChannels(channelList);
         })
-    }, [channels]);
+    }, []);
 
     const selectChannel = (channel) => () => {
         appSetChannel(channel);
+        const unread = chatService.setUnreadChannels(channel);
+        setUnreadChannels(unread);
     }
 
     const onChange = ({ target: { name, value }}) => {
@@ -34,7 +43,8 @@ const Channels = () => {
 
     const createChannel = e => {
         e.preventDefault();
-        socketService.addChannel(newChannel.name, newChannel.description);
+        const camelChannel =toCammelCase(newChannel.name)
+        socketService.addChannel(camelChannel, newChannel.description);
         setNewChannel(INIT);
         setModal();
     }
@@ -50,7 +60,7 @@ const Channels = () => {
                 {!!channels.length ? channels.map(channel => (
                     <div
                         key={channel.id}
-                        className="channel-label"
+                        className={`channel-label ${unreadChannels.includes(channel.id) ? 'unread' : ''}`}
                         onClick={selectChannel(channel)}
                     >
                         <div

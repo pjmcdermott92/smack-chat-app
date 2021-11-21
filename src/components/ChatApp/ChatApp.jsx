@@ -5,15 +5,29 @@ import Modal from '../Modal/Modal';
 import UserAvatar from '../UserAvatar/UserAvatar';
 import './ChatApp.css';
 import Channels from '../Channels/Channels';
+import Chats from '../Chats/Chats';
 
 const ChatApp = () => {
-    const { authService, socketService } = useContext(UserContext);
+    const { authService, socketService, chatService } = useContext(UserContext);
     const history = useHistory();
     const [modal, setModal] = useState(false);
+    const [chatMessages, setChatMessages] = useState([]);
+    const [unreadChannels, setUnreadChannels] = useState([]);
 
     useEffect(() => {
         socketService.establishConnection();
         return () => socketService.closeConnection();
+    }, []);
+
+    useEffect(() => {
+        socketService.getChatMessage((newMessage, messages) => {
+            if (newMessage.channelId === chatService.selectedChannel.id) {
+                setChatMessages(messages);
+            }
+            if (chatService.unreadChannels.length) {
+                setUnreadChannels(chatService.unreadChannels);
+            }
+        });
     }, []);
 
     const logoutUser = () => {
@@ -33,7 +47,8 @@ const ChatApp = () => {
                 </div>
             </nav>
             <div className="smack-app">
-                <Channels />
+                <Channels unread={unreadChannels} />
+                <Chats chats={chatMessages} />
             </div>
 
             <Modal title="Profile" isOpen={modal} close={() => setModal(false)}>

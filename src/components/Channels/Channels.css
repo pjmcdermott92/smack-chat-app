@@ -47,6 +47,8 @@
     line-height: 2;
 }
 
+.channel-label.unread { font-weight: bold; }
+
 .channel-list {
     padding: 20px 0;
 }

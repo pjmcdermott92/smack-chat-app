@@ -12,6 +12,8 @@ const URL_USER_BY_EMAIL = `${URL_USER}/byEmail/`;
 
 const URL_GET_CHANNELS = `${BASE_URL}/channel`;
 
+const URL_GET_MESSAGES = `${BASE_URL}/message/byChannel/`;
+
 const headers = { 'Content-Type': 'application/json' };
 
 class User {
@@ -122,12 +124,23 @@ export class ChatService {
     constructor(authHeader) {
         this.getAuthHeader = authHeader;
         this.channels = [];
+        this.unreadChannels = [];
         this.selectedChannel = {};
     }
 
     addChannel = channel => this.channels.push(channel);
+    addMessage = chat => this.messages.push(chat);
     setSelectedChannel = channel => this.selectedChannel = channel;
+    getSelectedChannel = () => this.selectedChannel;
     getAllChannels = () => this.channels;
+    addToUnread = urc => this.unreadChannels.push(urc);
+
+    setUnreadChannels = channel => {
+        if (this.unreadChannels.includes(channel.id)) {
+            this.unreadChanels = this.unreadChannels.filter(ch => ch !== channel.id);
+        }
+        return this.unreadChannels;
+    }
 
     async findAllChannels() {
         const headers = this.getAuthHeader();
@@ -145,12 +158,34 @@ export class ChatService {
             throw err;
         }
     }
+
+    async findAllMessagesForChannel(channelId) {
+        const headers = this.getAuthHeader();
+        try {
+            let res = await axios.get(URL_GET_MESSAGES + channelId, { headers });
+            res = res.data.map(msg => ({
+                messageBody: msg.messageBody,
+                channelId: msg.channelId,
+                id: msg._id,
+                userName: msg.userName,
+                userAvatar: msg.userAvatar,
+                userAvatarColor: msg.userAvatarColor,
+                timeStamp: msg.timeStamp
+            }));
+            this.messages = res;
+            return res;
+        } catch (err) {
+            console.error(err);
+            this.messages = [];
+            throw err;
+        }
+    }
 }
 
 export class SocketService {
     socket = io('http://localhost:3005/');
-    constructor(socketAddChannel, getAllChannels) {
-        this.socketAddChannel = socketAddChannel;
+    constructor(chatService) {
+        this.chatService = chatService;
     }
 
     establishConnection() {
@@ -170,9 +205,42 @@ export class SocketService {
     getChannel(cb) {
         this.socket.on('channelCreated', (name, description, id) => {
             const channel = { name, description, id }
-            this.socketAddChannel(channel);
-            const channelList = this.getAllChannels();
+            this.chatService.addChannel(channel);
+            const channelList = this.chatService.getAllChannels();
             cb(channelList);
+        });
+    }
+
+    addMessage(messageBody, channelId, user) {
+        const {userName, userId, userAvatar, userAvatarColor } = user;
+        if (!!messageBody && !!channelId && !!user) {
+            this.socket.emit('newMessage', messageBody, userId, channelId, userName, userAvatar, userAvatarColor);
+        }
+    }
+
+    getChatMessage(cb) {
+        this.socket.on('messageCreated', (messageBody, userId, channelId, userName, userAvatar, userAvatarColor, id, timeStamp) => {
+            const channel = this.chatService.getSelectedChannel();
+            const chat = { messageBody, userId, channelId, userName, userAvatar, userAvatarColor, id, timeStamp };
+            if (channelId !== channel.id && !this.chatService.unreadChannels.includes(channelId)) {
+                this.chatService.addToUnread(channelId);
+            }
+            this.chatService.messages = [...this.chatService.messages, chat];
+            cb(chat, this.chatService.messages);
+        });
+    }
+
+    startTyping(userName, channelId) {
+        this.socket.emit('startType', userName, channelId);
+    }
+
+    stopTyping(userName) {
+        this.socket.emit('startType', userName);
+    }
+
+    getUsersTyping(cb) {
+        this.socket.on('userTypingUpdate', (typingUsers) => {
+            cb(typingUsers);
         });
     }
 }
