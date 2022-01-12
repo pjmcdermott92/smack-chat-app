@@ -1,11 +1,10 @@
 import React, { useState, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { UserContext } from '../../App';
-import { DARK_AVATARS, LIGHT_AVATARS } from '../../constants';
 import Alert from '../Alert/Alert';
+import AvatarContainer from '../AvatarContainer/AvatarContainer';
+import ChooseAvatar from '../ChooseAvatar/ChooseAvatar';
 import Modal from '../Modal/Modal';
-import UserAvatar from '../UserAvatar/UserAvatar';
-import './UserCreate.css';
 
 const UserCreate = ({ history }) => {
     const { authService } = useContext(UserContext);
@@ -20,7 +19,6 @@ const UserCreate = ({ history }) => {
     const [modal, setModal] = useState(false);
     const [error, setError] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    const [avatarTheme, setAvatarTheme] = useState('dark');
 
     const onChange = ({ target: { name, value } }) => {
         setUserInfo({ ...userInfo, [name]: value });
@@ -45,7 +43,6 @@ const UserCreate = ({ history }) => {
                 authService.loginUser(email, password).then(() => {
                     authService.createUser(userName, email, avatarName, avatarColor).then(() => {
                         setUserInfo(INIT_STATE);
-                        setAvatarTheme('dark');
                         history.push('/');
                     }).catch(err => {
                         console.error('creating user', err);
@@ -63,7 +60,6 @@ const UserCreate = ({ history }) => {
         };
     }
 
-    const AVATARS = avatarTheme === 'light' ? LIGHT_AVATARS : DARK_AVATARS;
     const { userName, email, password, avatarName, avatarColor } = userInfo;
     const errorMessage = 'Error creating account. Please try again';
 
@@ -98,29 +94,18 @@ const UserCreate = ({ history }) => {
                     onChange={onChange}
                     value={password}
                 />
-                <div className="avatar-container">
-                    <UserAvatar avatar={{ avatarName, avatarColor }} className="create-avatar" />
-                    <div className="avatar-text" onClick={() => setModal(true)}>Choose Avatar</div>
-                    <div className="avatar-text" onClick={generateBgColor}>Generate Background Color</div>
-                </div>
+                <AvatarContainer
+                    avatarName={avatarName}
+                    avatarColor={avatarColor}
+                    generateBgColor={generateBgColor}
+                    setModal={setModal}
+                />
                 <input type="submit" className="submit-btn" value="Create Account" />
             </form>
             <div className="footer-text">Already have an account? Login <Link to="/login">HERE</Link></div>
         </div>
         <Modal title="Choose Avatar" isOpen={modal} close={() => setModal(false)}>
-            <div className="avatar-theme-toggle">
-                <input id="avatarDark" type="radio" name="avatarTheme" value="dark" defaultChecked={avatarTheme === 'dark'} onClick={() => setAvatarTheme('dark')} />
-                <label htmlFor="avatarDark">Dark</label>
-                <input id="avatarLight" type="radio" name="avatarTheme" value="light" defaultChecked={avatarTheme === 'light'} onClick={() => setAvatarTheme('light')} />
-                <label htmlFor="avatarLight">Light</label>
-            </div>
-            <div className={`avatar-list ${avatarTheme === 'light' && 'light' }`}>
-                {AVATARS.map(img => (
-                    <div key={img} className="create-avatar" onClick={() => chooseAvatar(img)} role="presentation">
-                        <img src={img} alt="avatar" />
-                    </div>
-                ))}
-            </div>
+            <ChooseAvatar chooseAvatar={chooseAvatar} />
         </Modal>
         </>
     )

@@ -1,8 +1,10 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { UserContext } from '../../App';
 import UserAvatar from '../UserAvatar/UserAvatar';
+import EditChat from './EditChat';
 import { formatDate } from '../../helpers/dateFormat';
 import './Chats.css';
+import Modal from '../Modal/Modal';
 
 const Chats = ({ chats }) => {
     const { authService, chatService, appSelectedChannel, socketService } = useContext(UserContext);
@@ -10,6 +12,9 @@ const Chats = ({ chats }) => {
     const [messageBody, setMessageBody] = useState('');
     const [typingMessage, setTypingMessage] = useState('');
     const [isTyping, setIsTyping] = useState(false);
+    const [editMessage, setEditMessage] = useState('');
+    const [selectedMessage, setSelectedMessage] = useState('');
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
 
     useEffect(() => {
         setMessages(chats);
@@ -67,9 +72,22 @@ const Chats = ({ chats }) => {
         setMessageBody('');
     }
 
+    const clickDeleteMessage = msgId => {
+        setSelectedMessage(msgId);
+        setShowDeleteModal(!showDeleteModal);
+    }
+
+    const deleteMessage = () => {
+        chatService.deleteMessage(selectedMessage);
+        setMessages(messages.filter(message => message.id !== selectedMessage));
+        setSelectedMessage('');
+        setShowDeleteModal(false);
+    }
+
     return(
+        <>
         <div className="chat">
-            <div className="chat-header">
+            <div className="chat-header">{console.log('STATE CHANGE')}
                 <h3>#{appSelectedChannel.name} - </h3>
                 <h4>{appSelectedChannel.description}</h4>
             </div>
@@ -86,7 +104,20 @@ const Chats = ({ chats }) => {
                         <div className="chat-user">
                             <strong>{msg.userName}</strong>
                             <small>{formatDate(msg.timeStamp)}</small>
-                            <div className="message-body">{msg.messageBody}</div>
+                            { msg.userId === authService.id && editMessage === '' && (
+                                <>
+                                <div className='message-actions'>
+                                    <div onClick={() => setEditMessage(msg.id)}>Edit</div>
+                                    <div onClick={() => clickDeleteMessage(msg.id)}>Delete</div>
+                                </div>
+                                </>
+                            ) }
+                            <div className="message-body">
+                                {editMessage && authService.name === msg.userName && editMessage === msg.id.toString()
+                                    ? <EditChat msg={msg} setEditMessage={setEditMessage} />
+                                    : msg.messageBody
+                                }
+                            </div>
                         </div>
                     </div>
                 )) : <div>No Messages</div> }
@@ -103,6 +134,14 @@ const Chats = ({ chats }) => {
                 </div>
             </form>
         </div>
+
+        <Modal title='Delete Message' isOpen={showDeleteModal} close={() => clickDeleteMessage('')}>
+            <p>Are you sure you want to delete this message?</p>
+            <button className='submit-btn' onClick={() => clickDeleteMessage('')}>No Don't Delete</button>
+            <br />
+            <button className='submit-btn logout-btn' onClick={deleteMessage}>I'm Sure, Delete Message</button>
+        </Modal>
+        </>
     )
 }
 

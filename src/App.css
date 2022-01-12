@@ -55,7 +55,32 @@ h2, h3, h4, h5 { margin: 0; }
   transition: ease-in-out 300ms;
 }
 
-.logout-btn { background-color: #B33F40; }
+.inline {
+  display: inline-block;
+  width: 50%;
+  margin-top: .25rem;
+  padding: .25rem;
+  font-weight: 400;
+}
+
+.cancel {
+  margin: .25rem;
+  text-align: center;
+  text-decoration: none;
+  color: var(--sky-blue);
+  transition: ease-in-out 200ms;
+  line-height: 1.5;
+}
+
+.cancel:hover {
+  color: var(--sky-tint);
+  cursor: pointer;
+}
+
+.logout-btn {
+  background-color: #B33F40;
+  border-color: #B33F40;;
+}
 .submit-btn:hover { background-color: #29A370; }
 .logout-btn:hover { background-color: #973537; }
 

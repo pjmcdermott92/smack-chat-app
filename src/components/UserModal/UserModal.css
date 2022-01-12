@@ -1,0 +1,38 @@
+.cancel-link, .edit-link {
+    display: block;
+    margin: .25rem;
+    text-align: center;
+    text-decoration: none;
+    color: var(--sky-blue);
+    transition: ease-in-out 200ms;
+    line-height: 1.5;
+}
+
+.cancel-link:hover, .edit-link:hover {
+    color: var(--sky-tint);
+    cursor: pointer;
+}
+
+.edit-link {
+    display: none;
+    position: absolute;
+    top: 1.85rem;
+    left: 6rem;
+    transition: 250ms ease-in-out;
+}
+
+.modal-content:hover .edit-link { display: initial; }
+
+.delete-account-link {
+    display: inline-block;
+    margin: .5rem auto -1rem;
+    padding: .5rem .5rem;
+    text-decoration: none;
+    color: #B33F40;
+    border-radius: 5px;
+}
+
+.delete-account-link:hover {
+    background-color: #973537;
+    color: #FFF;
+}

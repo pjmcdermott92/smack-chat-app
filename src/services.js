@@ -12,6 +12,7 @@ const URL_USER_BY_EMAIL = `${URL_USER}/byEmail/`;
 
 const URL_GET_CHANNELS = `${BASE_URL}/channel`;
 
+const URL_MESSAGES = `${BASE_URL}/message`;
 const URL_GET_MESSAGES = `${BASE_URL}/message/byChannel/`;
 
 const headers = { 'Content-Type': 'application/json' };
@@ -118,6 +119,38 @@ export class AuthService extends User {
             console.error(err);
         }
     }
+
+    async updateUser(name, email, avatarName, avatarColor) {
+        const headers = this.getBearerHeader();
+        const body = {
+            "name": name,
+            "email": email,
+            "avatarName": avatarName,
+            "avatarColor": avatarColor
+        }
+        try {
+            await axios.put(`${URL_USER}/${this.id}`, body, { headers });
+            this.setUserData({
+                _id: this.id,
+                name,
+                email,
+                avatarName,
+                avatarColor
+            });
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    async deleteUser() {
+        const headers = this.getBearerHeader();
+        try {
+            await axios.delete(`${URL_USER}/${this.id}`, { headers });
+            this.logoutUser();
+        } catch (err) {
+            console.error(err);
+        }
+    }
 }
 
 export class ChatService {
@@ -167,6 +200,7 @@ export class ChatService {
                 messageBody: msg.messageBody,
                 channelId: msg.channelId,
                 id: msg._id,
+                userId: msg.userId,
                 userName: msg.userName,
                 userAvatar: msg.userAvatar,
                 userAvatarColor: msg.userAvatarColor,
@@ -177,6 +211,17 @@ export class ChatService {
         } catch (err) {
             console.error(err);
             this.messages = [];
+            throw err;
+        }
+    }
+
+    async deleteMessage(messageId) {
+        const headers = this.getAuthHeader();
+        try {
+            await axios.delete(`${URL_MESSAGES}/${messageId}`, { headers });
+            this.messages = this.messages.filter(message => message.id !== messageId);
+        } catch (err) {
+            console.error(err);
             throw err;
         }
     }

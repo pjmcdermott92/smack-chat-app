@@ -13,14 +13,50 @@
 }
 
 .chat-message {
+    position: relative;
     display: flex;
     align-items: center;
     padding-bottom: 15px;
 }
 
+.message-actions {
+    display: none;
+    position: absolute;
+    right: -4rem;
+    top: 5px;
+    display: none;
+    align-items: center;
+    padding: .25rem;
+    font-size: .85rem;
+    background-color: #FFF;
+    border-radius: 10px;
+    box-shadow: 0 0 5px rgba(0,0,0,0.5);
+}
+
+.message-actions > div {
+    margin: 0 .25rem;
+    cursor: pointer;
+    color: var(--cloudy);
+}
+
+.message-actions > div:hover { color: var(--charcoal); }
+
+.chat-message:hover .message-actions {
+    display: flex;
+}
+
+.edit-chat {
+    display: block;
+    min-width: 100%;
+}
+
+.dots::before { top: 0; }
+.dots::after { bottom: 0; }
+
 .chat-header h4 { margin-left: 10px; }
 
 .chat-user {
+    position: relative;
     margin-left: 10px;
 }
 
