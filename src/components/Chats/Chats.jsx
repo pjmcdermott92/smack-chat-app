@@ -6,7 +6,7 @@ import { formatDate } from '../../helpers/dateFormat';
 import './Chats.css';
 import Modal from '../Modal/Modal';
 
-const Chats = ({ chats }) => {
+const Chats = ({ chats, deleteChannel }) => {
     const { authService, chatService, appSelectedChannel, socketService } = useContext(UserContext);
     const [messages, setMessages] = useState([]);
     const [messageBody, setMessageBody] = useState('');
@@ -21,7 +21,7 @@ const Chats = ({ chats }) => {
     }, [chats]);
 
     useEffect(() => {
-        if (appSelectedChannel.id) {
+        if (appSelectedChannel && appSelectedChannel.id) {
             chatService.findAllMessagesForChannel(appSelectedChannel.id)
                 .then(res => setMessages(res));
         }
@@ -72,6 +72,20 @@ const Chats = ({ chats }) => {
         setMessageBody('');
     }
 
+    const updateMessage = async msg => {
+        const body = {
+            messageBody: msg.messageContent,
+            userId: authService.id,
+            channelId: msg.channelId,
+            userName: authService.name,
+            userAvatar: authService.avatarName,
+            userAvatarColor: authService.avatarColor
+        };
+        const newMessages = await chatService.updateMessage(editMessage, body);
+        setMessages(newMessages);
+        setEditMessage('');
+    }
+
     const clickDeleteMessage = msgId => {
         setSelectedMessage(msgId);
         setShowDeleteModal(!showDeleteModal);
@@ -84,12 +98,16 @@ const Chats = ({ chats }) => {
         setShowDeleteModal(false);
     }
 
+    // if (!appSelectedChannel) return <div>No Channel Selected</div>
     return(
         <>
         <div className="chat">
-            <div className="chat-header">{console.log('STATE CHANGE')}
-                <h3>#{appSelectedChannel.name} - </h3>
-                <h4>{appSelectedChannel.description}</h4>
+            <div className="chat-header">
+                <h3>#{appSelectedChannel && appSelectedChannel.name} - </h3>
+                <h4>{appSelectedChannel && appSelectedChannel.description}</h4>
+                <div className='channel-delete' onClick={deleteChannel}>
+                    <span>&times;</span> Delete Channel
+                </div>
             </div>
             <div className="chat-list">
                 {!!messages.length ? messages.map(msg => (
@@ -114,7 +132,11 @@ const Chats = ({ chats }) => {
                             ) }
                             <div className="message-body">
                                 {editMessage && authService.name === msg.userName && editMessage === msg.id.toString()
-                                    ? <EditChat msg={msg} setEditMessage={setEditMessage} />
+                                    ? <EditChat
+                                        msg={msg}
+                                        setEditMessage={setEditMessage}
+                                        updateMessage={updateMessage}
+                                    />
                                     : msg.messageBody
                                 }
                             </div>

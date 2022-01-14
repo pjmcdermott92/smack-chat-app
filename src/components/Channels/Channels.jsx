@@ -4,11 +4,11 @@ import Modal from '../Modal/Modal';
 import { toCammelCase } from '../../helpers/cammelCase';
 import './Channels.css';
 
-const Channels = ({ unread }) => {
+const Channels = ({ unread, channels, setChannels }) => {
 
     const INIT = { name: '', description: '' };
 
-    const [channels, setChannels] = useState('');
+    // const [channels, setChannels] = useState('');
     const [unreadChannels, setUnreadChannels] = useState([]);
     const [modal, setModal] = useState(false);
     const [newChannel, setNewChannel] = useState(INIT);
@@ -23,12 +23,12 @@ const Channels = ({ unread }) => {
             setChannels(res);
             appSetChannel(res[0]);
         });
-    }, []);
+    },[]);
 
     useEffect(() => {
         socketService.getChannel(channelList => {
             setChannels(channelList);
-        })
+        });
     }, []);
 
     const selectChannel = (channel) => () => {
@@ -43,8 +43,9 @@ const Channels = ({ unread }) => {
 
     const createChannel = e => {
         e.preventDefault();
-        const camelChannel =toCammelCase(newChannel.name)
+        const camelChannel = toCammelCase(newChannel.name);
         socketService.addChannel(camelChannel, newChannel.description);
+        appSetChannel(chatService.channels[0]);
         setNewChannel(INIT);
         setModal();
     }
@@ -64,7 +65,7 @@ const Channels = ({ unread }) => {
                         onClick={selectChannel(channel)}
                     >
                         <div
-                            className={`inner ${(appSelectedChannel.id === channel.id) ? 'selected' : ''}`}
+                            className={`inner ${(appSelectedChannel && appSelectedChannel.id === channel.id) ? 'selected' : ''}`}
                         >
                             #{channel.name}
                         </div>

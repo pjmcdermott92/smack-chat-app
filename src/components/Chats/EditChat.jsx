@@ -1,14 +1,27 @@
 import React, { useState } from 'react';
 
-const EditChat = ({ msg, setEditMessage }) => {
-    const { id, userName, channelId, userAvatar, userAvatarColor, messageBody } = msg;
+const EditChat = ({ msg, setEditMessage, updateMessage }) => {
+    const { channelId, messageBody } = msg;
     const [messageContent, setMessageContent] = useState(messageBody);
 
-    const updateMessage = ({ target: { value } }) => setMessageContent(value);
+    const onChange = ({ target: { value } }) => setMessageContent(value);
+
+    // const onSubmit = e => {
+    //     e.preventDefault();
+    //     const body = {
+    //         messageBody: messageContent,
+    //         userId,
+    //         channelId,
+    //         userName,
+    //         userAvatar,
+    //         userAvatarColor
+    //     };
+    //     updateMessage(body);
+    // }
 
     const onSubmit = e => {
         e.preventDefault();
-        console.log(channelId);
+        updateMessage({ messageContent, channelId });
     }
 
     const clickCancel = e => {
@@ -21,7 +34,7 @@ const EditChat = ({ msg, setEditMessage }) => {
             <textarea
                 className='edit-chat'
                 value={messageContent}
-                onChange={updateMessage}
+                onChange={onChange}
             />
             <button className='submit-btn inline'>Save</button>
             <a href='/' className='cancel' onClick={clickCancel}>Cancel</a>

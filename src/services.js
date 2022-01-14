@@ -192,6 +192,17 @@ export class ChatService {
         }
     }
 
+    async deleteChannel(channelId) {
+        const headers = this.getAuthHeader();
+        try {
+            await axios.delete(`${URL_GET_CHANNELS}/${channelId}`, { headers } );
+            this.findAllChannels();
+        } catch (err) {
+            console.error(err);
+            throw err;
+        }
+    }
+
     async findAllMessagesForChannel(channelId) {
         const headers = this.getAuthHeader();
         try {
@@ -211,6 +222,20 @@ export class ChatService {
         } catch (err) {
             console.error(err);
             this.messages = [];
+            throw err;
+        }
+    }
+
+    async updateMessage(messageId, msg) {
+        const headers = this.getAuthHeader();
+        const body = JSON.stringify(msg);
+        const url = `${URL_MESSAGES}/${messageId}`;
+        try {
+            await axios.put(url, body, { headers });
+            const allMessages = this.findAllMessagesForChannel(msg.channelId);
+            return allMessages;
+        } catch (err) {
+            console.error(err);
             throw err;
         }
     }
